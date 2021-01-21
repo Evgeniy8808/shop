@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 
 User = get_user_model()
 
@@ -16,31 +17,63 @@ class Category(models.Model):
 
 
 class Product(models.Model):
+    class Meta:
+        abstract = True
+
     category = models.ForeignKey(Category, verbose_name='Катекория', on_delete=models.CASCADE)
     title = models.CharField(max_length=255, verbose_name='Название продукта')
     slug = models.SlugField(unique=True)
     image = models.ImageField(verbose_name='Изоброжение')
-    description = models.TextField(verbose_name='Описание')
+    description = models.TextField(verbose_name='Описание', null=True)
     price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Цена')
 
     def __str__(self):
         return self.title
 
 
+class Notebook(Product):
+    diagonal = models.CharField(max_length=5, verbose_name='Диагональ')
+    display_type = models.CharField(max_length=255, verbose_name='Тип дисплея')
+    processor_freg = models.CharField(max_length=255, verbose_name='Частота процессора')
+    ram = models.CharField(max_length=255, verbose_name='Память')
+    video = models.CharField(max_length=255, verbose_name='Видео память')
+    time_without_charge = models.CharField(max_length=255, verbose_name='Время работы аккумулятора')
+
+    def __str__(self):
+        return "{} : {}".format(self.category.name, self.title)
+
+
+class Smartphone(Product):
+    diagonal = models.CharField(max_length=5, verbose_name='Диагональ')
+    display_type = models.CharField(max_length=255, verbose_name='Тип дисплея')
+    resolution = models.CharField(max_length=255, verbose_name='Разрешение экрана')
+    ram = models.CharField(max_length=255, verbose_name='Память')
+    sd = models.BooleanField(default=True)
+    sd_vol_max = models.CharField(max_length=255, verbose_name='Макс.обьем встроенной памяти')
+    accum_volue = models.CharField(max_length=255, verbose_name='Обьем батареи')
+    main_cam_up = models.CharField(max_length=255, verbose_name='Главная камера')
+    frontal_cam_up = models.CharField(max_length=255, verbose_name='Фронтальная камера')
+
+    def __str__(self):
+        return "{} : {}".format(self.category.name, self.title)
+
+
 class CartProduct(models.Model):
-    user = models.ForeignKey('Costumer', verbose_name='Покупатель', on_delete=models.CASCADE)
-    cart = models.ForeignKey('Cart', verbose_name='Корзина', on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, verbose_name='Продукт', on_delete=models.CASCADE)
+    user = models.ForeignKey("Customer", verbose_name='Покупатель', on_delete=models.CASCADE)
+    cart = models.ForeignKey('Cart', verbose_name='Корзина', on_delete=models.CASCADE, related_name='related_product')
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
     qtr = models.PositiveIntegerField(default=1)
     final_price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Общая цена')
 
     def __str__(self):
-        return "Продукт: {}".format(self.product.title)
+        return "Продукт: {} (для корзины)".format(self.product.title)
 
 
 class Cart(models.Model):
-    owner = models.ForeignKey('Custumer', verbose_name='Владелец', on_delete=models.CASCADE)
-    products = models.ManyToManyField(CartProduct, blank=True)
+    owner = models.ForeignKey('Customer', verbose_name='Владелец', on_delete=models.CASCADE)
+    products = models.ManyToManyField(CartProduct, blank=True, related_name='cart_product')
     total_products = models.PositiveIntegerField(default=0)
     final_price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Общая цена')
 
@@ -54,12 +87,15 @@ class Customer(models.Model):
     address = models.CharField(max_length=255, verbose_name='Адресс')
 
     def __str__(self):
-        return "Покупатель: {} {}", format(self.user.first_name, self.user.last_name)
+        return "Покупатель: {} {}".format(self.user.first_name, self.user.last_name)
 
-class Specification(models.Model):
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    name = models.CharField(max_length=255, verbose_name='Имя товара для хар-ик')
-
-    def __str__(self):
-        return "Характеристика для товара: {} ".format(self.name)
+# class Reviews(models.Model):
+#     email = models.EmailField()
+#     name = models.CharField(max_length=30, verbose_name='Имя')
+#     text = models.CharField(max_length=1500, verbose_name='Отзыв')
+#     parent = models.ForeignKey('self', verbose_name="Родитель", on_delete=models.SET_NULL, blank=True, null=True)
+#     product = models.ForeignKey(Product, verbose_name='Название продукта', on_delete=models.CASCADE,
+#                                 related_name='reviews_product')
+#
+#     def __str__(self):
+#         return "Отзывы о {} ".format(self.product)
