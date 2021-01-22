@@ -1,9 +1,18 @@
+from PIL import Image
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 
 User = get_user_model()
+
+
+class MinResolutionErrorException(Exception):
+    pass
+
+
+class MaxResolutionErrorException(Exception):
+    pass
 
 
 class LatestProductsManager:
@@ -19,7 +28,8 @@ class LatestProductsManager:
             ct_model = ContentType.objects.filter(model=with_respect_to)
             if ct_model.exists():
                 if with_respect_to in args:
-                    return sorted(products, key=lambda x: x.__class__._meta.model_name.startswith(with_respect_to), reverse=True)
+                    return sorted(products, key=lambda x: x.__class__._meta.model_name.startswith(with_respect_to),
+                                  reverse=True)
 
         return products
 
@@ -37,18 +47,33 @@ class Category(models.Model):
 
 
 class Product(models.Model):
+    MIN_RESOLUTION = (400, 400)
+    MAX_RESOLUTION = (2800, 2800)
+    MAX_IMAGE_SIZE = 6000000
+
     class Meta:
         abstract = True
 
     category = models.ForeignKey(Category, verbose_name='Катекория', on_delete=models.CASCADE)
     title = models.CharField(max_length=255, verbose_name='Название продукта')
     slug = models.SlugField(unique=True)
-    image = models.ImageField(verbose_name='Изоброжение', blank=True)
-    description = models.TextField(verbose_name='Описание', null=True, blank=True)
+    image = models.ImageField(verbose_name='Изоброжение')
+    description = models.TextField(verbose_name='Описание', null=True)
     price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Цена')
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        image = self.image
+        img = Image.open(image)
+        min_width, min_height = self.MIN_RESOLUTION
+        max_width, max_height = self.MAX_RESOLUTION
+        if img.width < min_width or img.height < min_height:
+            raise MinResolutionErrorException('Разрешение изоброжение меньше минимального')
+        if img.width > max_width or img.height > max_height:
+            raise MaxResolutionErrorException('Разрешение изоброжение больше максимального')
+        return image
 
 
 class Notebook(Product):
