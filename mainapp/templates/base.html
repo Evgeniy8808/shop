@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>{% block title %} {% endblock title %}</title>
+
+    <link rel="stylesheet" href="{% static "css/bootstrap.css" %}">
+    <link rel="stylesheet" href="{% static "css/font-awesome.css" %}">
+    <link rel="stylesheet" href="{% static "css/styles.css" %}">
+
+
+    <link rel="stylesheet" crossorigin="anonymous"
+          href="https://gc.kis.v2.scr.kaspersky-labs.com/E3E8934C-235A-4B0E-825A-35A08381A191/abn/main.css?attr=aHR0cHM6Ly9zdGFydGJvb3RzdHJhcC5naXRodWIuaW8vc3RhcnRib290c3RyYXAtc2hvcC1ob21lcGFnZS8"/>
+</head>
+
+<body>
+{% include 'include/header.html' %}
+
+<!-- Navigation -->
+{% include 'product_detail.html' %}
+
+<!-- Page Content -->
+{% include 'include/sidebar.html' %}
+<!-- /.container -->
+
+{% include 'include/footer.html' %}
+<!-- Bootstrap core JavaScript -->
+
+<script src={% static "js/jquery.js" %}></script>
+<script src={% static "js/bootstrap.js" %}></script>
+<script src={% static "js/script.js" %}></script>

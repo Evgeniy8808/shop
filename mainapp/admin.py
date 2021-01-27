@@ -13,6 +13,7 @@ class NotebookAdminForm(ModelForm):
             '<span style="color:red;">Загружайте изоброжения с расширением {}x{}</span>'.format(
                 *Product.MIN_RESOLUTION))
 
+    # -----------------------Вставляем изоброжение с ограничением-----------------
     def clean_image(self):
         image = self.cleaned_data['image']
         img = Image.open(image)
@@ -20,7 +21,7 @@ class NotebookAdminForm(ModelForm):
         max_width, max_height = Product.MAX_RESOLUTION
         if image.size > Product.MAX_IMAGE_SIZE:
             raise ValidationError(
-                mark_safe('<span style="color:red;">Обьем изоброжения больше допустимого</span>'))
+                mark_safe('<span style="color:red;">Обьем изоброжения больше 6мб</span>'))
         if img.width < min_width or img.height < min_height:
             raise ValidationError(
                 mark_safe('<span style="color:red;">Разрешение изоброжение меньше минимального</span>'))
@@ -35,14 +36,14 @@ class NotebookAdmin(admin.ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'category':
-            return ModelChoiceField(Category.objects.filter(slug='notebooks'))
+            return ModelChoiceField(Category.objects.filter(slug='notebook'))
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class SmartphoneAdmin(admin.ModelAdmin):
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'category':
-            return ModelChoiceField(Category.objects.filter(slug='smartphones'))
+            return ModelChoiceField(Category.objects.filter(slug='smartphone'))
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
