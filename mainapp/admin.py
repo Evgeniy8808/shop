@@ -14,21 +14,21 @@ class NotebookAdminForm(ModelForm):
                 *Product.MIN_RESOLUTION))
 
     # -----------------------Вставляем изоброжение с ограничением-----------------
-    # def clean_image(self):
-    #     image = self.cleaned_data['image']
-    #     img = Image.open(image)
-    #     min_width, min_height = Product.MIN_RESOLUTION
-    #     max_width, max_height = Product.MAX_RESOLUTION
-    #     if image.size > Product.MAX_IMAGE_SIZE:
-    #         raise ValidationError(
-    #             mark_safe('<span style="color:red;">Обьем изоброжения больше 6мб</span>'))
-    #     if img.width < min_width or img.height < min_height:
-    #         raise ValidationError(
-    #             mark_safe('<span style="color:red;">Разрешение изоброжение меньше минимального</span>'))
-    #     if img.width > max_width or img.height > max_height:
-    #         raise ValidationError(
-    #             mark_safe('<span style="color:red;">Разрешение изоброжение больше максимального</span>'))
-    #     return image
+    def clean_image(self):
+        image = self.cleaned_data['image']
+        img = Image.open(image)
+        min_width, min_height = Product.MIN_RESOLUTION
+        max_width, max_height = Product.MAX_RESOLUTION
+        if image.size > Product.MAX_IMAGE_SIZE:
+            raise ValidationError(
+                mark_safe('<span style="color:red;">Обьем изоброжения больше 6мб</span>'))
+        if img.width < min_width or img.height < min_height:
+            raise ValidationError(
+                mark_safe('<span style="color:red;">Разрешение изоброжение меньше минимального</span>'))
+        if img.width > max_width or img.height > max_height:
+            raise ValidationError(
+                mark_safe('<span style="color:red;">Разрешение изоброжение больше максимального</span>'))
+        return image
 
 
 class NotebookAdmin(admin.ModelAdmin):

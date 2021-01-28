@@ -13,7 +13,7 @@ User = get_user_model()
 
 
 def get_product_url(obj, viewname):
-    ct_model = obj.__class__.meta.model_name
+    ct_model = obj.__class__._meta.model_name
     return reverse(viewname, kwargs={'ct_model': ct_model, 'slug': obj.slug})
 
 
@@ -108,7 +108,7 @@ class Product(models.Model):
         # super().save(*args, **kwargs)
 
 
-class Notebook(Product):
+class Notebook (Product):
     diagonal = models.CharField(max_length=5, verbose_name='Диагональ')
     display_type = models.CharField(max_length=255, verbose_name='Тип дисплея')
     processor_freg = models.CharField(max_length=255, verbose_name='Частота процессора')
