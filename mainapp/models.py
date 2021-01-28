@@ -108,7 +108,7 @@ class Product(models.Model):
         # super().save(*args, **kwargs)
 
 
-class Notebook (Product):
+class Notebook(Product):
     diagonal = models.CharField(max_length=5, verbose_name='Диагональ')
     display_type = models.CharField(max_length=255, verbose_name='Тип дисплея')
     processor_freg = models.CharField(max_length=255, verbose_name='Частота процессора')
@@ -132,7 +132,8 @@ class Smartphone(Product):
     display_type = models.CharField(max_length=255, verbose_name='Тип дисплея')
     resolution = models.CharField(max_length=255, verbose_name='Разрешение экрана')
     ram = models.CharField(max_length=255, verbose_name='Память')
-    sd_vol_max = models.CharField(max_length=255, verbose_name='Макс.обьем встроенной памяти')
+    sd = models.BooleanField(default=True, verbose_name='Наличие cd карты')
+    sd_vol_max = models.CharField(max_length=255, null=True, blank=True, verbose_name='Макс.обьем встраимовой sd памяти')
     accum_volue = models.CharField(max_length=255, verbose_name='Обьем батареи')
     main_cam_up = models.CharField(max_length=255, verbose_name='Главная камера')
     frontal_cam_up = models.CharField(max_length=255, verbose_name='Фронтальная камера')
@@ -158,7 +159,7 @@ class CartProduct(models.Model):
     final_price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Общая цена')
 
     def __str__(self):
-        return "Продукт: {} (для корзины)".format(self.cart_product.title)
+        return "Продукт: {} (для корзины)".format(self.content_object.title)
 
     class Meta:
         verbose_name = 'Продукт'
@@ -170,6 +171,8 @@ class Cart(models.Model):
     products = models.ManyToManyField(CartProduct, blank=True, related_name='cart_product')
     total_products = models.PositiveIntegerField(default=0)
     final_price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Общая цена')
+    in_order = models.BooleanField(default=False)
+    for_anonymous_user = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.id)
