@@ -16,12 +16,17 @@
             <h2>{{ products.title }}</h2>
             <p>Цена: {{ products.price }}</p>
             <p>Описание: {{ products.description }}</p>
+            <p>slug: {{ products.slug }}</p>
+            <p></p>
         </div>
-        <p class="pt-3 ">Характеристики</p>
+
 
 {#-------------------------Вывод характеристик 1-й способ через templatetags---------------------------#}
-
+<div class="options">
+    <h4 class="pt-3 text-center">Характеристики</h4>
     {{ products|product_spec }}
+</div>
+
 
 {#-------------------------Вывод характеристик 2-й способ ---------------------------#}
 

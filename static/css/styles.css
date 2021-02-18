@@ -6,3 +6,9 @@ body {
     flex-direction: row;
     width: 50%;
 }
+
+.options{
+    margin: 5px;
+    background: lightgrey;
+    width: 50%;
+}

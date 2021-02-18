@@ -12,6 +12,10 @@ from io import BytesIO
 User = get_user_model()
 
 
+def get_models_for_count(*model_names):
+    return [models.Count(model_name) for model_name in model_names]
+
+
 def get_product_url(obj, viewname):
     ct_model = obj.__class__._meta.model_name
     return reverse(viewname, kwargs={'ct_model': ct_model, 'slug': obj.slug})
@@ -48,9 +52,29 @@ class LatestProducts:
     objects = LatestProductsManager()
 
 
+class CategoryManager(models.Manager):
+    CATEGORY_NAME_COUNT_NAME = {
+        'Ноутбуки': 'notebook__count',
+        'Смартфоны': 'smartphone__count'
+    }
+
+    def get_queryset(self):
+        return super().get_queryset()
+
+    def get_categories_for_left_sidebar(self):
+        models = get_models_for_count('notebook', 'smartphone')
+        qs = list(self.get_queryset().annotate(*models))
+        date = [
+            dict(name=c.name, url=c.get_absolute_url(), count=getattr(c, self.CATEGORY_NAME_COUNT_NAME[c.name]))
+            for c in qs
+        ]
+        return date
+
+
 class Category(models.Model):
     name = models.CharField(max_length=255, verbose_name='Название категории')
     slug = models.SlugField(unique=True)
+    object = CategoryManager()
 
     def __str__(self):
         return self.name
@@ -58,6 +82,9 @@ class Category(models.Model):
     class Meta:
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
+
+    def get_absolute_url(self):
+        return reverse('category_detail', kwargs={'slug': self.slug})
 
 
 class Product(models.Model):
@@ -133,7 +160,8 @@ class Smartphone(Product):
     resolution = models.CharField(max_length=255, verbose_name='Разрешение экрана')
     ram = models.CharField(max_length=255, verbose_name='Память')
     sd = models.BooleanField(default=True, verbose_name='Наличие cd карты')
-    sd_vol_max = models.CharField(max_length=255, null=True, blank=True, verbose_name='Макс.обьем встраимовой sd памяти')
+    sd_vol_max = models.CharField(max_length=255, null=True, blank=True,
+                                  verbose_name='Макс.обьем встраимовой sd памяти')
     accum_volue = models.CharField(max_length=255, verbose_name='Обьем батареи')
     main_cam_up = models.CharField(max_length=255, verbose_name='Главная камера')
     frontal_cam_up = models.CharField(max_length=255, verbose_name='Фронтальная камера')

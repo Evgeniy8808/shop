@@ -4,6 +4,31 @@ from .models import *
 from PIL import Image
 from django.utils.safestring import mark_safe
 
+from django_admin_listfilter_dropdown.filters import (DropdownFilter, ChoiceDropdownFilter, RelatedDropdownFilter)
+
+
+class EntityAdmin(admin.ModelAdmin):
+    list_filter = (
+        ('a_charfield', DropdownFilter),
+        ('a_choicefield', ChoiceDropdownFilter),
+        ('a_foreignkey_field', RelatedDropdownFilter),
+    )
+
+
+class SmartphoneAdminForm(ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = kwargs.get('instance')
+        if not instance.sd:
+            self.fields['sd_vol_max'].widget.attrs.update({
+                'readonly': True, 'style': 'background: lightgray;'
+            })
+
+    def clean(self):
+        if not self.cleaned_data['sd']:
+            self.cleaned_data['sd_vol_max'] = None
+        return self.cleaned_data
+
 
 class NotebookAdminForm(ModelForm):
 
@@ -41,8 +66,8 @@ class NotebookAdmin(admin.ModelAdmin):
 
 
 class SmartphoneAdmin(admin.ModelAdmin):
-
     change_form_template = 'admin.html'
+    form = SmartphoneAdminForm
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'category':
